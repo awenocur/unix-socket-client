@@ -51,8 +51,13 @@ void init (const char *path, char **cmdav) {
         if (pid < 0)
             die("fork");
         else if (!pid) {
+            setsid();
+            close(0);
+            close(1);
+	    close(2);
             dup2(peer, 0);
             dup2(peer, 1);
+	    dup2(peer, 2);
             close(peer);
             execvp(cmdav[0], cmdav);
             die("execvp");
