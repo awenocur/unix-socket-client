@@ -27,7 +27,7 @@ int unixsocket (const char *path) {
         die("socket");
     myaddr.sun_family = AF_UNIX;
     strncpy(myaddr.sun_path, path, sizeof myaddr.sun_path - 1);
-    if (bind(sock, &myaddr, sizeof myaddr) < 0)
+    if (bind(sock, (struct sockaddr*) &myaddr, sizeof myaddr) < 0)
         die("bind");
     if (listen(sock, 0) < 0)
         die("listen");
@@ -42,8 +42,10 @@ void init (const char *path, char **cmdav) {
     socklen_t peerlen = sizeof peeraddr;
     int sock = unixsocket(path);
     signal(SIGINT, end);
+    signal(SIGQUIT, end);
+    signal(SIGKILL, end);
     while (1) {
-        peer = accept(sock, &peeraddr, &peerlen);
+        peer = accept(sock, (struct sockaddr *) &peeraddr, &peerlen);
         if (peer < 0)
             die("accept");
         printf("client connected\n");
